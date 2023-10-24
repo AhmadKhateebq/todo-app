@@ -1,0 +1,15 @@
+{
+  "rules": {
+    "counter":{
+      ".read": "auth !== null",
+          ".write": "auth !== null",
+    },
+        
+    "todo": {
+      "$uid": {
+        ".read": "auth !== null && (auth.uid === $uid||auth.token.sub === $uid)",
+        ".write": "auth !== null && auth.uid === $uid",
+        ".indexOn":["name","date","cid","deleted"],
+      }
+    }
+  }}
