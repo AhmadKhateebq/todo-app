@@ -5,6 +5,9 @@ class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
   @override
   Widget build(BuildContext context) {
+    print(
+      'splash'
+    );
     return const Scaffold(
       backgroundColor: Colors.blueGrey,
       body: Center(

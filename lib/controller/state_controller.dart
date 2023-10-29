@@ -10,7 +10,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:todo_app/page/add_todo_page.dart';
+import 'package:todo_app/data/to_do_object.dart';
+import 'package:todo_app/page/edit_page.dart';
 
 import 'requests_controller.dart';
 
@@ -44,11 +45,18 @@ class TodoController extends GetxController with StateMixin {
 
   void showAddTodoOverlay() {
     Get.to(
-      () => AddTodo(),
+      () => ( AddAndEdit(edit: false, title: 'add todo', date: DateTime.now(),)),
+    );
+  }
+  void showEditTodoOverlay(ToDo todo) {
+    Get.to(
+          () => (AddAndEdit(edit: true, title: 'Edit todo', date: todo.date,todo: todo,imageUrl: todo.imageUrl,todoName: todo.name,)),
     );
   }
 
+
   RxBool isLoading({bool withGoogle = false}) {
+    loading.value = true;
     if (!started) {
       started = true;
       init(withGoogle);
@@ -86,6 +94,10 @@ class TodoController extends GetxController with StateMixin {
   }
 
   logEvent([String? event, Map<String, dynamic>? parameters]) async {
+    analytics = FirebaseAnalytics.instance;
+    if(kIsWeb){
+      return;
+    }
     if (event != null && parameters != null) {
       await analytics.logEvent(name: event, parameters: parameters);
     } else if (event != null) {
@@ -132,7 +144,9 @@ class TodoController extends GetxController with StateMixin {
       Get.find<TodoController>().change(RxStatus.success());
       analytics = FirebaseAnalytics.instance;
       initialized = true;
-      await restoreData();
+      if(!kIsWeb){
+        await restoreData();
+      }
     }
     loading.value = false;
     // await fillLogs();

@@ -37,14 +37,6 @@ class LoginInterceptor extends Interceptor {
     if (response.data["idToken"] != null) {
       _token = response.data["idToken"];
     }
-    try{
-      response.data.forEach((key, value) {
-        log(name: key,value.toString());
-      });
-    }
-   catch (e,s){
-      log(error: e,stackTrace : s,name: 'ERROR','');
-   }
     super.onResponse(response, handler);
   }
 

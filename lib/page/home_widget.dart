@@ -16,20 +16,19 @@ class HomePage extends GetView<TodoController> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        drawerEnableOpenDragGesture: true,
+        drawerEdgeDragWidth: 0,
         key: controller.scaffoldKey,
         appBar: AppBar(
+          titleSpacing: 0,
           backgroundColor: controller.color,
-          actions: [
-            Obx(
-              () => Icon(controller.darkIcon),
-            )
-          ],
           title: Text(
             'title'.tr,
             style: const TextStyle(fontSize: 24),
           ),
         ),
         drawer: Drawer(
+            elevation: 10,
             width: context.width * (3 / 4),
             child: Column(
               children: [
@@ -98,22 +97,45 @@ class HomePage extends GetView<TodoController> {
                   height: 15,
                 ),
                 ListTile(
+                  leading: Obx(() => controller.locationLoading.value
+                      ? const Icon(Icons.location_searching)
+                      : const Icon(Icons.my_location)),
+                  title: Obx(() => controller.locationLoading.value
+                      ? Text('Computing'.tr)
+                      : Text('Compute GeoHash'.tr)),
+                  onTap: () async {
+                    FirebaseAnalytics.instance.logEvent(
+                        name: "todo_ready", parameters: {'todo_date': 'ready'});
+                    controller.getLocation();
+                  },
+                ),
+                // ListTile(
+                //   leading: const Icon(
+                //     Icons.error_outline,
+                //     color: Colors.red,
+                //   ),
+                //   title: Text("crash".tr),
+                //   onTap: () async {
+                //     controller.logEvent("error_occurred");
+                //     controller.error();
+                //   },
+                // ),
+                ListTile(
+                    title: Text('camera'.tr),
+                    onTap: () async {
+                      print("isNotInit");
+                      await Get.find<CustomCameraController>().init();
+                      print("isInit");
+                      await Get.find<CustomCameraController>().getImages();
+                      await Get.to(() => const CameraApp());
+                    },
+                    leading: const Icon(Icons.camera)),
+                ListTile(
                   leading: const Icon(Icons.info),
                   title: Text("more".tr),
                   onTap: () async {
                     controller.logEvent("more_info_selected");
                     await Get.find<RequestsController>().empty();
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.error_outline,
-                    color: Colors.red,
-                  ),
-                  title: Text("crash".tr),
-                  onTap: () async {
-                    controller.logEvent("error_occurred");
-                    controller.error();
                   },
                 ),
                 ListTile(
@@ -126,28 +148,6 @@ class HomePage extends GetView<TodoController> {
                     Get.find<RequestsController>().logout();
                   },
                 ),
-                ListTile(
-                  leading: Obx(() => controller.locationLoading.value
-                      ? const Icon(Icons.location_searching)
-                      : const Icon(Icons.my_location)),
-                  title: Obx(() => controller.locationLoading.value
-                      ? const Text("Computing ")
-                      : const Text("Compute GeoHash")),
-                  onTap: () async {
-                    FirebaseAnalytics.instance.logEvent(
-                        name: "todo_ready", parameters: {'todo_date': 'ready'});
-                    controller.getLocation();
-                  },
-                ),
-                IconButton(
-                    onPressed: () async {
-                      print("isNotInit");
-                      await Get.find<CustomCameraController>().init();
-                      print("isInit");
-                      await Get.find<CustomCameraController>().getImages();
-                      await Get.to(() => const CameraApp());
-                    },
-                    icon: const Icon(Icons.camera)),
                 Expanded(
                   child: Align(
                     alignment: AlignmentDirectional.bottomEnd,
@@ -164,7 +164,15 @@ class HomePage extends GetView<TodoController> {
         floatingActionButton: Obx(() => FloatingActionButton(
               // title: Text("add".tr),
               backgroundColor: controller.color,
-              child: const Icon(Icons.add),
+              child: Obx(() => Get.find<TodoController>().darkMode.value
+                  ? const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    )
+                  : const Icon(
+                      Icons.add,
+                color:Colors.black
+                    )),
               onPressed: () async {
                 controller.logEvent("list_tile_pressed");
                 controller.showAddTodoOverlay();

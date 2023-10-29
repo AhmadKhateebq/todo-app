@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -39,7 +43,13 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    if(FirebaseAuth.instance.currentUser!=null){
+      Get.find<RequestsController>().signInAgain(FirebaseAuth.instance.currentUser!);
+      // Get.offAll(()=>const HomePage());
+      return const HomePage();
+    }
+      else {
+      return SafeArea(
       child: Scaffold(
         body: Stack(
           children: [
@@ -75,6 +85,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+    }
   }
 
   Widget loginForm() {
@@ -227,14 +238,25 @@ class _LoginPageState extends State<LoginPage> {
 
   handleLoginGoogle() async {
     isLoading.value = true;
-    var value = await Get.find<RequestsController>().handleSignIn();
+    late bool value;
+    if (!kIsWeb) {
+      value = await Get.find<RequestsController>().handleSignInAndroid();
+      print('android');
+    } else {
+      print('web');
+      value = await Get.find<RequestsController>().handleSignInWeb();
+      print('web');
+      // value = (await Get.find<RequestsController>().signInWithGoogleWeb());
+    }
+    print(value);
     (Get.find<TodoController>().isLoading());
     value
-        ? Get.to(() => Obx(() => Get.find<TodoController>().isLoading().value
+        ? Get.off(() => Obx(() => Get.find<TodoController>().isLoading().value
             ? const SplashScreen()
             : const HomePage()))
         : {
-            Get.snackbar("error", "Wrong email or password"),
+            isLoading.value = false,
+            Get.snackbar("error", "Something went wrong"),
             emailController.text = "",
             passwordController.text = ""
           };
@@ -249,12 +271,10 @@ class _LoginPageState extends State<LoginPage> {
         await requestsController
             .signIn(emailController.text, passwordController.text)
             .then((value) {
+              Get.to(()=>const HomePage());
           (Get.find<TodoController>().isLoading());
           value
-              ? Get.to(() => Obx(() =>
-                  Get.find<TodoController>().isLoading().value
-                      ? const SplashScreen()
-                      : const HomePage()))
+              ? Get.to(() => const HomePage())
               : {
                   Get.snackbar("error", "Wrong email or password"),
                   emailController.text = "",

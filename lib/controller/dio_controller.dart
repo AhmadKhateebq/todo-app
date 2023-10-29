@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../util/login_interceptor.dart';
 import '../util/consts.dart';
 import '../data/to_do_object.dart';
@@ -30,6 +31,7 @@ class DioRequests {
 
   setGoogleLogIn(String token) {
    LoginInterceptor.setToken(token);
+
   }
   removeGoogleLogIn() {
     _dio.options.headers
@@ -51,6 +53,9 @@ class DioRequests {
       });
       return todos;
     });
+  }
+  fetchTodo({required String userId,required String key}) async {
+    return await _dio.get('/todo/$userId/$key.json');
   }
 
   fetchFiltered({required localId, anchorCID, required entries}) async {
