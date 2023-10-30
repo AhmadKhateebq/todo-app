@@ -56,10 +56,6 @@ class RequestsController extends GetxController {
       await FirebaseNotificationController.getRef().init();
     } else {}
     final storage = FirebaseStorage.instance.ref().child("images");
-    if (kDebugMode) {
-      print(storage.fullPath);
-      print('path');
-    }
     if (!kIsWeb) {
       FirebaseDatabase.instance.setPersistenceEnabled(true);
     }
@@ -69,7 +65,7 @@ class RequestsController extends GetxController {
     return filters[filter.toLowerCase()] ?? false;
   }
 
-  getTodo(String userId, String todoId) async {
+  Future<ToDo> getTodo(String userId, String todoId) async {
     final response =
         await FirebaseDatabase.instance.ref('/todo/$userId/$todoId').get();
     return ToDo.fromDynamicMap(key, response.value as Map<dynamic, dynamic>);
@@ -81,9 +77,7 @@ class RequestsController extends GetxController {
       XFile? file = (await imagePicker.pickImage(source: ImageSource.gallery))!;
       return await uploadImage(file);
     } catch (e) {
-      if (kDebugMode) {
-        print("D:");
-      }
+
       return noImage;
     }
   }
@@ -94,9 +88,6 @@ class RequestsController extends GetxController {
       XFile? file = (await imagePicker.pickImage(source: ImageSource.camera))!;
       return await uploadImage(file);
     } catch (e) {
-      if (kDebugMode) {
-        print("D:");
-      }
       return noImage;
     }
   }
@@ -120,9 +111,6 @@ class RequestsController extends GetxController {
       }
 
       var imageUrl = await referenceImageToUpload.getDownloadURL();
-      if (kDebugMode) {
-        print(imageUrl);
-      }
       return imageUrl;
     } catch (error) {
       log(error: error, 'upload image', name: 'ERROR');
@@ -544,13 +532,15 @@ class RequestsController extends GetxController {
     try {
       await _ensureInitialized();
       _currentUser = (await GoogleSignInPlatform.instance.signIn());
+      print(_currentUser);
       // var response =
       await _getAuthHeaders();
       // _userCredential.addAll({'localId': _currentUser!.id});
       await fetchAnchoredData();
       return true;
     } catch (error) {
-      rethrow;
+      return false;
+      // rethrow;
     }
   }
 
