@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 
 import '../controller/requests_controller.dart';
@@ -43,49 +44,43 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    if(FirebaseAuth.instance.currentUser!=null){
-      Get.find<RequestsController>().signInAgain(FirebaseAuth.instance.currentUser!);
-      // Get.offAll(()=>const HomePage());
-      return const HomePage();
-    }
-      else {
       return SafeArea(
-      child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-                width: Get.width,
-                height: Get.height,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(colors: [
-                    Colors.deepPurple,
-                    Colors.purple,
-                    Colors.purpleAccent,
-                    Colors.pinkAccent,
-                    Colors.deepOrange,
-                    Colors.deepOrangeAccent,
-                    Colors.orange,
-                    Colors.orangeAccent,
-                  ]),
-                ),
-                child: const Align(
-                  alignment: Alignment.topCenter,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
-                    child: Icon(
-                      Icons.person,
-                      size: 100,
-                    ),
+        child: Scaffold(
+          body: Stack(
+            children: [
+              Container(
+                  width: Get.width,
+                  height: Get.height,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                      Colors.deepPurple,
+                      Colors.purple,
+                      Colors.purpleAccent,
+                      Colors.pinkAccent,
+                      Colors.deepOrange,
+                      Colors.deepOrangeAccent,
+                      Colors.orange,
+                      Colors.orangeAccent,
+                    ]),
                   ),
-                )),
-            Obx(() => isLoading.value
-                ? const Center(child: CircularProgressIndicator())
-                : loginForm()),
-          ],
+                  child: const Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+                      child: Icon(
+                        Icons.person,
+                        size: 100,
+                      ),
+                    ),
+                  )),
+              Obx(() => isLoading.value
+                  ? const Center(child: CircularProgressIndicator())
+                  : loginForm()),
+            ],
+          ),
         ),
-      ),
-    );
-    }
+      );
+
   }
 
   Widget loginForm() {
@@ -241,19 +236,14 @@ class _LoginPageState extends State<LoginPage> {
     late bool value;
     if (!kIsWeb) {
       value = await Get.find<RequestsController>().handleSignInAndroid();
-      print('android');
     } else {
-      print('web');
       value = await Get.find<RequestsController>().handleSignInWeb();
-      print('web');
       // value = (await Get.find<RequestsController>().signInWithGoogleWeb());
     }
-    print(value);
     (Get.find<TodoController>().isLoading());
+    print('value');
     value
-        ? Get.off(() => Obx(() => Get.find<TodoController>().isLoading().value
-            ? const SplashScreen()
-            : const HomePage()))
+        ?  Get.off(() => const SplashScreen())
         : {
             isLoading.value = false,
             Get.snackbar("error", "Something went wrong"),
@@ -271,7 +261,6 @@ class _LoginPageState extends State<LoginPage> {
         await requestsController
             .signIn(emailController.text, passwordController.text)
             .then((value) {
-              Get.to(()=>const HomePage());
           (Get.find<TodoController>().isLoading());
           value
               ? Get.to(() => const HomePage())

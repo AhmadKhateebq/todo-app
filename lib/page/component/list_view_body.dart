@@ -188,7 +188,10 @@ class _ListViewBodyState extends State<ListViewBody> {
         ),
         child: ListTile(
           onTap: (){
-            Get.toNamed('/preview/${Get.find<RequestsController>().userCredential['localId']}/${todo.id!}');
+            Get.toNamed('/preview/',parameters: {
+              'uid':'${Get.find<RequestsController>().userCredential['localId']}',
+              'id':todo.id!
+            });
           },
           trailing: Container(
             height: 100,

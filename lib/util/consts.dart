@@ -6,3 +6,4 @@ const String key = "AIzaSyB_1cZWpJTsJ-XAaX8ADUmBo7iCiSqp3tY";
 const String webClientId = "938312015413-mgrlithrgt4r3i74tcdm98pd5rnl15ug.apps.googleusercontent.com"; //web
 const String clientId = "910477989919-b5lh3cqtj7imbdu6qt1hsj8mkn8jn93f.apps.googleusercontent.com"; //android
 const noImage = "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg";
+const loadingImage = "https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif";

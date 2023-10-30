@@ -12,7 +12,6 @@ class FirebaseNotificationController {
   init() async {
     await _firebaseMessaging.requestPermission();
     var token = getToken();
-    print(await token);
     initPushNotification();
   }
 
@@ -23,7 +22,6 @@ class FirebaseNotificationController {
   }
 
   handleMessage(RemoteMessage? message) async {
-    print("HELLLOOOO0");
     if(message != null){
       Get.snackbar(message.notification!.title!, message.notification!.body!);
     }

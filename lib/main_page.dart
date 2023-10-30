@@ -28,7 +28,7 @@ main() async {
     getPages: [
       GetPage(name: '/', page: () => const MainPage()),
       GetPage(name: '/home', page: () => const HomePage()),
-      GetPage(name: '/preview/:uid/:id', page: () => const PreviewTodoPage()),
+      GetPage(name: '/preview/', page: () => const PreviewTodoPage()),
     ],
     supportedLocales: const [
       Locale('ar'),
