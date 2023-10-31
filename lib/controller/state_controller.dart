@@ -53,11 +53,11 @@ class TodoController extends GetxController with StateMixin {
   }
 
 
-  RxBool isLoading({bool withGoogle = false})  {
+  Future<RxBool> isLoading({bool withGoogle = false})  async {
     loading.value = true;
     if (!started) {
       started = true;
-      init();
+      await init();
     }
     return loading;
   }

@@ -34,15 +34,16 @@ class _MainSplashScreenState extends State<MainSplashScreen> {
     Get.put(CustomCameraController(),permanent: true);
     Get.put(RequestsController(),permanent: true);
     await Get.find<RequestsController>().init();
-    var todoController = Get.find<TodoController>();
     var requests = Get.find<RequestsController>();
     var user = FirebaseAuth.instance.currentUser;
+
     if (user != null) {
       await requests.signInAgain(FirebaseAuth.instance.currentUser!);
     }
     var currentRoute = Get.currentRoute;
     if (context.mounted) {
-      var handler = DeepLinkHandler(context: context,user:user);
+      var handler = DeepLinkHandler(context: context, user: user);
+      print(currentRoute);
       handler.handle(currentRoute);
     }
   }

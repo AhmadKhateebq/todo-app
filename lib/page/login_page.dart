@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
+import 'package:todo_app/controller/deeplink_handler.dart';
 
 import '../controller/requests_controller.dart';
 import '../controller/state_controller.dart';
@@ -41,46 +43,58 @@ class _LoginPageState extends State<LoginPage> {
   bool passwordTouched = false;
 
   final form = false;
+  String link = '';
+  bool fromDeepLink = false;
+
+  @override
+  void initState() {
+    if (Get.arguments != null && Get.arguments['fromDeepLink'] != null) {
+      fromDeepLink = Get.arguments['fromDeepLink'] as bool;
+      link = Get.arguments['link'];
+      print('fromDeepLink');
+      print(fromDeepLink);
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-      return SafeArea(
-        child: Scaffold(
-          body: Stack(
-            children: [
-              Container(
-                  width: Get.width,
-                  height: Get.height,
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(colors: [
-                      Colors.deepPurple,
-                      Colors.purple,
-                      Colors.purpleAccent,
-                      Colors.pinkAccent,
-                      Colors.deepOrange,
-                      Colors.deepOrangeAccent,
-                      Colors.orange,
-                      Colors.orangeAccent,
-                    ]),
-                  ),
-                  child: const Align(
-                    alignment: Alignment.topCenter,
-                    child: Padding(
-                      padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
-                      child: Icon(
-                        Icons.person,
-                        size: 100,
-                      ),
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Container(
+                width: Get.width,
+                height: Get.height,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(colors: [
+                    Colors.deepPurple,
+                    Colors.purple,
+                    Colors.purpleAccent,
+                    Colors.pinkAccent,
+                    Colors.deepOrange,
+                    Colors.deepOrangeAccent,
+                    Colors.orange,
+                    Colors.orangeAccent,
+                  ]),
+                ),
+                child: const Align(
+                  alignment: Alignment.topCenter,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+                    child: Icon(
+                      Icons.person,
+                      size: 100,
                     ),
-                  )),
-              Obx(() => isLoading.value
-                  ? const Center(child: CircularProgressIndicator())
-                  : loginForm()),
-            ],
-          ),
+                  ),
+                )),
+            Obx(() => isLoading.value
+                ? const Center(child: CircularProgressIndicator())
+                : loginForm()),
+          ],
         ),
-      );
-
+      ),
+    );
   }
 
   Widget loginForm() {
@@ -240,52 +254,47 @@ class _LoginPageState extends State<LoginPage> {
       value = await Get.find<RequestsController>().handleSignInWeb();
       // value = (await Get.find<RequestsController>().signInWithGoogleWeb());
     }
-    (Get.find<TodoController>().isLoading());
-    print('value');
-    value
-        ?  Get.off(() => const SplashScreen())
-        : {
-            isLoading.value = false,
-            Get.snackbar("error", "Something went wrong"),
-            emailController.text = "",
-            passwordController.text = ""
-          };
+    afterLogin(value);
   }
 
   loginAndRegister(bool isLogin) async {
     bool emailValid = requestsController.validateEmail(emailController.text);
     bool passwordValid =
         requestsController.validatePassword(passwordController.text);
+    late bool value;
     if (emailValid && passwordValid) {
       if (isLogin) {
-        await requestsController
-            .signIn(emailController.text, passwordController.text)
-            .then((value) {
-          (Get.find<TodoController>().isLoading());
-          value
-              ? Get.to(() => const HomePage())
-              : {
-                  Get.snackbar("error", "Wrong email or password"),
-                  emailController.text = "",
-                  passwordController.text = ""
-                };
-        });
+        value = await requestsController.signIn(
+            emailController.text, passwordController.text);
       } else {
-        await requestsController
-            .register(emailController.text, passwordController.text)
-            .then((value) {
-          (Get.find<TodoController>().isLoading().value);
-          value
-              ? Get.to(() => Obx(() =>
-                  Get.find<TodoController>().isLoading().value
-                      ? const SplashScreen()
-                      : const HomePage()))
-              : Get.snackbar("error", "Wrong email or password");
-        });
+        value = await requestsController.register(
+            emailController.text, passwordController.text);
       }
+      afterLogin(value);
     } else if (!emailValid && passwordValid) {
       emailController.text = "";
     } else if (!passwordValid && emailValid) {
+      passwordController.text = "";
+    }
+  }
+
+  afterLogin(bool value) async {
+    await Get.find<TodoController>().isLoading();
+    if (value) {
+      if (fromDeepLink) {
+        if(context.mounted) {
+          var handler = DeepLinkHandler(context: context, user: FirebaseAuth.instance.currentUser);
+          log(link,name:'link');
+
+          handler.handle(link);
+        }
+      } else {
+        Get.off(() => const SplashScreen());
+      }
+    } else {
+      isLoading.value = false;
+      Get.snackbar("error", "Something went wrong");
+      emailController.text = "";
       passwordController.text = "";
     }
   }

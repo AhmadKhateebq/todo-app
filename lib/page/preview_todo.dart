@@ -28,38 +28,19 @@ class _PreviewTodoPageState extends State<PreviewTodoPage> {
       name: 'Loading',
       imageUrl: loadingImage,
       done: false);
+  bool fromDeepLink = false;
 
   @override
   void initState() {
     try {
       setIds();
+      if (Get.arguments != null && Get.arguments['fromDeepLink'] != null) {
+        fromDeepLink = Get.arguments['fromDeepLink'] as bool;
+      }
     } catch (e) {
       log(e.toString());
     }
     super.initState();
-  }
-
-  @override
-  void didUpdateWidget(oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    setIds();
-  }
-
-  Future<void> setIds() async {
-    // if (kIsWeb) {
-    //   final initialURI = await getInitialUri();
-    //   final idUri = Uri.parse(initialURI!.fragment);
-    //   String uid = idUri.queryParameters['uid']!;
-    //   String id = idUri.queryParameters['id']!;
-    //   getTodo(uid, id);
-    // } else {
-    //   String uid = Get.parameters['uid']!;
-    //   String id = Get.parameters['id']!;
-    //   getTodo(uid, id);
-    // }
-    String uid = Get.parameters['uid']!;
-    String id = Get.parameters['id']!;
-    await getTodo(uid, id);
   }
 
   @override
@@ -96,15 +77,7 @@ class _PreviewTodoPageState extends State<PreviewTodoPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       TextButton(
-                        onPressed: () {
-                          try{
-                            Get.back();
-                          }catch (e,s){
-                            print(e.toString());
-                            print(s.toString());
-                          }
-
-                        },
+                        onPressed: backOnAction,
                         child: getText('Back'),
                       ),
                       TextButton(
@@ -167,9 +140,42 @@ class _PreviewTodoPageState extends State<PreviewTodoPage> {
     }
   }
 
+  Future<void> setIds() async {
+    // if (kIsWeb) {
+    //   final initialURI = await getInitialUri();
+    //   final idUri = Uri.parse(initialURI!.fragment);
+    //   String uid = idUri.queryParameters['uid']!;
+    //   String id = idUri.queryParameters['id']!;
+    //   getTodo(uid, id);
+    // } else {
+    //   String uid = Get.parameters['uid']!;
+    //   String id = Get.parameters['id']!;
+    //   getTodo(uid, id);
+    // }
+    String uid = Get.parameters['uid']!;
+    String id = Get.parameters['id']!;
+    await getTodo(uid, id);
+  }
+
+  backOnAction() {
+    if (fromDeepLink) {
+      if (Get.context!.mounted) {
+        Navigator.pushReplacementNamed(Get.context!, '/home');
+      }
+    } else {
+      Get.back();
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    setIds();
+  }
+
+  @override
+  void didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
     setIds();
   }
 }

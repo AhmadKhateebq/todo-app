@@ -5,14 +5,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 class DeepLinkHandler {
-  final BuildContext context;
-  final User? user;
+  final BuildContext _context;
+  User? _user;
+  DeepLinkHandler({required User? user,required BuildContext context}) : _user = user, _context = context;
 
-  DeepLinkHandler({required this.context, required this.user});
-
+  set user(User value) {
+    _user = value;
+  }
+  updateUser(){
+    _user = FirebaseAuth.instance.currentUser;
+  }
   handle(String link) {
     if (link case '/') {
-      if(user == null){
+      if(_user == null){
         _login();
       }else{
         _homeScreen();
@@ -27,13 +32,13 @@ class DeepLinkHandler {
       String route = fragment.pathSegments[0];
       if (route == 'preview') {
         if (queryParamaters['uid'] != null && queryParamaters['id'] != null) {
-          if (user != null) {
+          if (_user != null) {
             _previewLoggedIn(fragment.toString());
           }else{
-            _previewVisitor(fragment.toString());
+            _previewVisitor(uri.toString());
           }
         } else {
-          if (user != null) {
+          if (_user != null) {
             _homeScreen();
           }else{
             _login();
@@ -42,17 +47,18 @@ class DeepLinkHandler {
       }
     }
   }
-
-  _homeScreen() => Navigator.pushNamed(context, '/home');
-
-  _login() => Navigator.pushReplacementNamed(context, '/login');
-
+  _homeScreen() => Navigator.pushReplacementNamed(_context, '/home');
+  _login() => Navigator.pushReplacementNamed(_context, '/login');
   _previewVisitor(String link) {
-      Navigator.pushReplacementNamed(context, '/login');
-     Navigator.pushNamed(context, link);
+      Navigator.pushReplacementNamed(
+          _context,
+          '/login',
+          arguments: {
+        'fromDeepLink':true,
+        'link' : link
+      });
   }
   _previewLoggedIn(String link) {
-    Navigator.pushReplacementNamed(context, '/home');
-    Navigator.pushNamed(context, link);
+    Navigator.pushReplacementNamed(_context, link);
   }
 }
