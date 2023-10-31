@@ -1,0 +1,56 @@
+//from : https://firebase.flutter.dev/docs/manual-installation/ios
+//also this maybe archived, if didnt work, try
+//this site : https://firebase.google.com/docs/flutter/setup
+//also, there is this site : https://console.firebase.google.com/project/todo-app-28551/settings/general/ios:com.example.iosConfig
+firebase config in info.plist:
+<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+----------------------------
+//from : https://docs.flutter.dev/cookbook/navigation/set-up-universal-links
+deep links config in ios:
+1-Launch Xcode.
+2-Open the ios/Runner.xcworkspace file inside the project’s ios folder.
+3-Navigate to the Info Plist file in the ios/Runner folder.
+4-In the Info property list, control-click at the list to add a row.
+5-Control-click the newly added row and turn on the Raw Keys and Values mode
+6-Update the key to FlutterDeepLinkingEnabled with a Boolean value set to YES.
+-{
+<key>FlutterDeepLinkingEnabled</key>
+  	<true/>
+  	}-
+7-Click the top-level Runner.
+8-Click Signing & Capabilities.
+9-Click + Capability to add a new domain.
+10-Click Associated Domains.
+11-In the Associated Domains section, click +.
+12-Enter applinks:<web domain>. Replace <web domain> with your own domain name. //todo-app-28551.web.app//
+-------------------
+Hosting apple-app-site-association file :
+--
+App ID (kinda like sha256)
+~Apple formats the app ID as <team id>.<bundle id>.
+    ~Locate the bundle ID in the Xcode project.
+    ~Locate the team ID in the developer account.
+~For example: Given a team ID of S8QB4VV633 and a bundle ID of com.example.deeplinkCookbook, The app ID is S8QB4VV633.com.example.deeplinkCookbook.
+--
+apple-app-site-association
+the hosted file would be at  <web domain>/.well-known/apple-app-site-association
+The hosted file should have the following content:
+--json file--
+{
+  "applinks": {
+      "apps": [],
+      "details": [
+      {
+        "appID": "S8QB4VV633.com.example.deeplinkCookbook",--<team id>.<bundle id>.--
+        "paths": ["*"]
+      }
+    ]
+  }
+}
+--json file end--
+Note: It might take up to 24 hours before Apple’s Content Delivery Network (CDN) requests the apple-app-site-association (AASA) file from your web domain.
+The universal link won’t work until the CDN requests the file. To bypass Apple’s CDN, check out the alternate mode section.
