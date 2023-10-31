@@ -7,7 +7,7 @@
         
     "todo": {
       "$uid": {
-        ".read": "auth !== null && (auth.uid === $uid||auth.token.sub === $uid)",
+        ".read": "true",
         ".write": "auth !== null && auth.uid === $uid",
         ".indexOn":["name","date","cid","deleted"],
       }

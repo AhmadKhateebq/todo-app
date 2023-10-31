@@ -24,7 +24,8 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.example.todo_app"
+    namespace "com.example.todo_a" +
+            "pp"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 

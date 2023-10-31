@@ -189,7 +189,6 @@ class _CameraAppState extends State<CameraApp> {
             child: child,
           ),
           onPressed: () {
-            print('clicked $index');
             controller.setImage(index);
             // controller.selectedImage.value = child;
           },

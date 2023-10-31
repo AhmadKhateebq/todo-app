@@ -1,35 +1,55 @@
+import 'package:intl/intl.dart';
+import 'package:todo_app/util/consts.dart';
+
 class ToDo {
   DateTime date;
   String name;
   String? id;
   String? imageUrl;
   int? cid;
+  bool? done;
 
-  ToDo(
-      {required this.date,
-      required this.name,
-      this.id,
-      this.cid,
-      this.imageUrl});
+  ToDo({
+    required this.date,
+    required this.name,
+    this.id,
+    this.cid,
+    this.imageUrl,
+    this.done,
+  });
 
   Map<String, dynamic> toJson() {
     return {
-      'date': date.toIso8601String(),
+      'date': DateFormat('y-MM-dd').format(date),
       'name': name,
       'imageUrl': imageUrl,
       'id': id,
+      'cid':cid,
+      'done':done
     };
   }
 
   factory ToDo.fromMap(Map<String, dynamic> map) {
     return ToDo(
-      date: DateTime.parse(map['date']),
-      name: map['name'],
-      imageUrl: map['imageUrl'],
-      id: map['id'],
-    );
+        date: DateTime.parse(map['date']),
+        name: map['name'],
+        imageUrl: map['imageUrl'],
+        id: map['id'],
+        done: map['done'] ?? false);
   }
 
+  factory ToDo.fromDynamicMap(String key, Map<dynamic, dynamic> map) {
+    return ToDo(
+        id: key,
+        date: DateTime.parse(map['date']),
+        name: map['name'],
+        imageUrl: map['imageUrl'],
+        cid: (map['cid']),
+        done: map['done'] ?? false);
+  }
+  bool isExpired(){
+    return date.isBefore(DateTime.now());
+  }
   @override
   String toString() {
     return 'ToDo{date: $date, name: $name, id: $id, imageUrl: $imageUrl, cid: $cid}';
@@ -40,8 +60,10 @@ class ToDo {
         id: key,
         cid: value['cid']!,
         name: value['name']!,
-        imageUrl: value['imageUrl'] ??
-            "https://upload.wikimedia.org/wikipedia/commons/1/14/No_Image_Available.jpg",
-        date: DateTime.parse(value['date']!));
+        imageUrl: value['imageUrl'] ?? noImage,
+        date: DateTime.parse(value['date']!),
+        done:value['done']??false
+    );
+
   }
 }

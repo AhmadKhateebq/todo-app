@@ -10,7 +10,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:todo_app/page/add_todo_page.dart';
+import 'package:todo_app/data/to_do_object.dart';
+import 'package:todo_app/page/edit_page.dart';
 
 import 'requests_controller.dart';
 
@@ -29,8 +30,6 @@ class TodoController extends GetxController with StateMixin {
   String hash = '';
   var locationLoading = false.obs;
 
-  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
   restoreData() async {
     Get.changeTheme(
         storage.read("dark") == true ? ThemeData.dark() : ThemeData.light());
@@ -44,14 +43,21 @@ class TodoController extends GetxController with StateMixin {
 
   void showAddTodoOverlay() {
     Get.to(
-      () => AddTodo(),
+      () => ( AddAndEdit(edit: false, title: 'add todo', date: DateTime.now(),)),
+    );
+  }
+  void showEditTodoOverlay(ToDo todo) {
+    Get.to(
+          () => (AddAndEdit(edit: true, title: 'Edit todo', date: todo.date,todo: todo,imageUrl: todo.imageUrl,todoName: todo.name,)),
     );
   }
 
-  RxBool isLoading({bool withGoogle = false}) {
+
+  Future<RxBool> isLoading({bool withGoogle = false})  async {
+    loading.value = true;
     if (!started) {
       started = true;
-      init(withGoogle);
+      await init();
     }
     return loading;
   }
@@ -82,10 +88,13 @@ class TodoController extends GetxController with StateMixin {
     storage.save();
     locale.value = Locale(val);
     Get.updateLocale(Locale(val));
-    scaffoldKey.currentState?.closeDrawer();
   }
 
   logEvent([String? event, Map<String, dynamic>? parameters]) async {
+    analytics = FirebaseAnalytics.instance;
+    if(kIsWeb){
+      return;
+    }
     if (event != null && parameters != null) {
       await analytics.logEvent(name: event, parameters: parameters);
     } else if (event != null) {
@@ -101,8 +110,6 @@ class TodoController extends GetxController with StateMixin {
         if (locale.value?.languageCode == ('ar')) {
           throw Exception();
         }
-        double i = double.parse("num");
-        print(i);
       } on FormatException catch (error, stackTrace) {
         FirebaseCrashlytics.instance.log("inside catch");
         await FirebaseCrashlytics.instance.recordError(
@@ -111,18 +118,14 @@ class TodoController extends GetxController with StateMixin {
           reason: 'parser error',
           information: ['double parse a non number', 'more info'],
         );
-        if (kDebugMode) {
-          print("Error saving ToDo: $error");
-        }
         throw const FormatException();
       } on Exception catch (_) {
-        print("ERROOOR");
         throw Exception();
       }
     }
   }
 
-  init(bool withGoogle) async {
+  init() async {
     if (initialized) {
     } else {
       await Get.find<RequestsController>().init();
@@ -132,9 +135,16 @@ class TodoController extends GetxController with StateMixin {
       Get.find<TodoController>().change(RxStatus.success());
       analytics = FirebaseAnalytics.instance;
       initialized = true;
-      await restoreData();
+      try{
+        if(!kIsWeb){
+          await restoreData();
+        }
+      }catch (e){
+      }
     }
+    await Future.delayed(const Duration(seconds: 1));
     loading.value = false;
+    print('loading = false');
     // await fillLogs();
   }
 
@@ -145,11 +155,6 @@ class TodoController extends GetxController with StateMixin {
     // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
     PlatformDispatcher.instance.onError = (error, stack) {
       switch (error.toString()) {
-        // case 'Exception':
-        //   {
-        //     print("Exception 1");
-        //     break;
-        //   }
         case 'FormatException':
           {
             break;
