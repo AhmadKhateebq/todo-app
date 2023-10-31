@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart';
 import 'package:todo_app/controller/state_controller.dart';
+import 'package:todo_app/page/component/page_view_comp.dart';
 
 import '../controller/camera_controller.dart';
 import '../controller/requests_controller.dart';
@@ -158,12 +159,12 @@ class HomePage extends StatelessWidget {
                   ),
                   ListTile(
                     leading: const Icon(
-                      Icons.text_fields,
+                      Icons.pageview,
                       color: Colors.red,
                     ),
-                    title: Text("logout".tr),
+                    title: Text("page view".tr),
                     onTap: () async {
-                      Get.toNamed('/text', parameters: {'text': '123456'});
+                      Get.to(()=>const PageViewBody());
                     },
                   ),
                   Expanded(

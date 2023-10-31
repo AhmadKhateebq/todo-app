@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:todo_app/controller/state_controller.dart';
 import 'package:todo_app/data/to_do_object.dart';
+import 'package:todo_app/page/component/page_view_comp.dart';
 import 'package:todo_app/page/preview_todo.dart';
 import 'package:todo_app/util/consts.dart';
 import 'package:todo_app/util/language_changer.dart';
@@ -177,7 +178,6 @@ class _ListViewBodyState extends State<ListViewBody> {
                   await Get.find<RequestsController>().restore(todo);
                 }
                 // list.removeAt(index);
-
               },
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
@@ -188,10 +188,7 @@ class _ListViewBodyState extends State<ListViewBody> {
         ),
         child: ListTile(
           onTap: (){
-            Get.toNamed('/preview/',parameters: {
-              'uid':'${Get.find<RequestsController>().userCredential['localId']}',
-              'id':todo.id!
-            });
+            listTileOnTap(index, todo);
           },
           trailing: Container(
             height: 100,
@@ -214,7 +211,13 @@ class _ListViewBodyState extends State<ListViewBody> {
   void _setupScrollController() {
     _scrollController.addListener(_scrollListener);
   }
-
+  listTileOnTap(int index,ToDo todo){
+    Get.to(()=> PageViewBody(initialPage: index,));
+    // Get.toNamed('/preview/',parameters: {
+    //   'uid':'${Get.find<RequestsController>().userCredential['localId']}',
+    //   'id':todo.id!
+    // });
+  }
   getText(ToDo todo) {
     Color color = Colors.transparent;
     String name = todo.name;
